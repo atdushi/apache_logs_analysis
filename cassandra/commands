@@ -1,0 +1,23 @@
+bin/cassandra
+bin/nodetool status
+bin/cqlsh
+
+SELECT * FROM system.local;
+
+CREATE KEYSPACE my_keyspace WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+
+USE my_keyspace;
+
+CREATE TABLE apache_logs (
+    remote_host text,
+    remote_logname text,
+    remote_user text,
+    request_time timestamp,
+    request_line text,
+    final_status int,
+    bytes_sent int,
+    user_agent text,
+    PRIMARY KEY (remote_host, request_time)
+);
+
+COPY apache_logs(remote_host, remote_logname, remote_user, request_time, request_line, final_status, bytes_sent, user_agent) FROM 'apache logs .csv' WITH DELIMITER=',' AND HEADER=TRUE;

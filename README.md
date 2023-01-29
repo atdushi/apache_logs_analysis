@@ -1,1 +1,3 @@
-# apache_logs_analysis
+# Анализ логов
+
+![Diagram1](./images/diagram.drawio.png)
