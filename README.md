@@ -58,6 +58,7 @@ https://disk.yandex.ru/d/BsdiH3DMTHpPrw
 - https://cassandra.apache.org/doc/latest/cassandra/getting_started/installing.html
 - https://docs.datastax.com/en/developer/python-driver/3.25/getting_started/
 - https://github.com/datastax/spark-cassandra-connector
+- https://stackoverflow.com/questions/69027126/how-do-i-connect-to-cassandra-with-dbeaver-community-edition
 
 ```bash
 bin/cassandra
