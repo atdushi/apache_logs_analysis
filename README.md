@@ -55,12 +55,9 @@ https://disk.yandex.ru/d/BsdiH3DMTHpPrw
 ### Настройка и запуск
 
 Полезные ссылки:
-
-https://cassandra.apache.org/doc/latest/cassandra/getting_started/installing.html
-
-https://docs.datastax.com/en/developer/python-driver/3.25/getting_started/
-
-https://github.com/datastax/spark-cassandra-connector
+- https://cassandra.apache.org/doc/latest/cassandra/getting_started/installing.html
+- https://docs.datastax.com/en/developer/python-driver/3.25/getting_started/
+- https://github.com/datastax/spark-cassandra-connector
 
 ```bash
 bin/cassandra
