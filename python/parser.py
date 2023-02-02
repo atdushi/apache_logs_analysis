@@ -4,6 +4,7 @@ from apachelogs import LogParser
 from cassandra.cluster import Cluster, ExecutionProfile, EXEC_PROFILE_DEFAULT
 from enum import Enum
 from tqdm import tqdm
+from user_agents import parse as ua_parse
 
 
 class DataLoadingMode(Enum):
@@ -20,23 +21,15 @@ class Colors:
     ENDC = '\033[0m'
 
 
-data_loading_mode = DataLoadingMode.Initializing
-
 # https://httpd.apache.org/docs/current/mod/mod_log_config.html
 log_format = "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" \"%{Some-IP}i\""
 log_parser = LogParser(log_format)
 
 
 def write_to_cassandra(source):
-    debug_print = False
-
     profile = ExecutionProfile(request_timeout=30)
     cluster = Cluster(execution_profiles={EXEC_PROFILE_DEFAULT: profile})
     session = cluster.connect('my_keyspace')
-
-    if debug_print:
-        print(session.execute("SELECT * FROM system.local").one())
-        print('****************Apache Logs************* ')
 
     in_file = open(source, 'r')
 
@@ -47,47 +40,55 @@ def write_to_cassandra(source):
             break
 
         log = log_parser.parse(line)
+        ua_string = log.headers_in["User-Agent"]
+        user_agent = ua_parse(ua_string)
 
         session.execute(
             """
-            INSERT INTO apache_logs (remote_host, remote_logname, remote_user, request_time, request_line, final_status, bytes_sent, user_agent)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO apache_logs (
+                remote_host, remote_logname, remote_user, request_time, request_line, final_status, bytes_sent, user_agent,
+                device_family, device_brand, device_model,
+                browser_family, browser_version,
+                is_mobile, is_tablet, is_pc, is_bot
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s,
+                    %s, %s,
+                    %s, %s, %s, %s)
             """,
-            (log.remote_host, log.remote_logname, log.remote_user, log.request_time, log.request_line, log.final_status,
-             int(log.bytes_sent), log.headers_in["User-Agent"])
+            (log.remote_host, log.remote_logname, log.remote_user, log.request_time, log.request_line, log.final_status, int(log.bytes_sent), ua_string,
+             user_agent.device.family, user_agent.device.brand, user_agent.device.model,
+             user_agent.browser.family, user_agent.browser.version_string,
+             user_agent.is_mobile, user_agent.is_tablet, user_agent.is_pc, user_agent.is_bot)
         )
-
-        if debug_print:
-            print('Log text: ')
-            print(line.strip())
-            print(
-                f"{log.remote_host} {log.remote_logname} {log.remote_user} {log.request_time} {log.request_line} {log.final_status} {log.bytes_sent} {log.headers_in['User-Agent']}")
-            print('Parsed log: ')
-            # print(log.directives["%u"])
-            print('------------------------------')
 
     in_file.close()
 
-    if debug_print:
-        rows = session.execute('SELECT * FROM apache_logs LIMIT 10')
-        for row in rows:
-            print(row)
 
-
-def write_to_csv(source, dest):
+def write_to_csv(source, dest='../data/result.csv'):
     with open(source, 'r') as in_file, open(dest, 'w') as out_file:
         writer = csv.writer(out_file, escapechar="\\", quoting=csv.QUOTE_MINIMAL)
         header = ["remote_host", "remote_logname", "remote_user", "request_time",
-                  "request_line", "final_status", "bytes_sent", "user_agent"]
+                  "request_line", "final_status", "bytes_sent", "user_agent",
+                  "device_family", "device_brand", "device_model",
+                  "browser_family", "browser_version",
+                  "is_mobile", "is_tablet", "is_pc", "is_bot"
+                  ]
         writer.writerow(header)
 
         lines = in_file.readlines()
         for row in tqdm(lines):
             try:
                 log = log_parser.parse(row)
+                ua_string = log.headers_in["User-Agent"]
+                user_agent = ua_parse(ua_string)
 
                 line = [log.remote_host, log.remote_logname, log.remote_user, log.request_time,
-                        log.request_line, log.final_status, log.bytes_sent, log.headers_in['User-Agent']]
+                        log.request_line, log.final_status, log.bytes_sent, ua_string,
+                        user_agent.device.family, user_agent.device.brand, user_agent.device.model,
+                        user_agent.browser.family, user_agent.browser.version_string,
+                        user_agent.is_mobile, user_agent.is_tablet, user_agent.is_pc, user_agent.is_bot
+                        ]
 
                 writer.writerow(line)
             except apachelogs.InvalidEntryError as ex:
@@ -101,8 +102,12 @@ def write_to_csv(source, dest):
     print(Colors.OKGREEN + 'Conversion finished.' + Colors.ENDC)
 
 
-path = 'access.log path'
-if data_loading_mode == DataLoadingMode.Initializing:
-    write_to_csv(path, '../data/result.csv')
-else:
-    write_to_cassandra(path)
+write_strategies = {
+    DataLoadingMode.Incremental: write_to_cassandra,
+    DataLoadingMode.Initializing: write_to_csv
+}
+
+data_loading_mode = DataLoadingMode.Incremental
+path = '/mnt/nvme/Projects/DataEngineer/apache_logs_analysis/data/head'
+
+write_strategies[data_loading_mode](path)
