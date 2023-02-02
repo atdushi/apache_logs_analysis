@@ -113,3 +113,10 @@ COPY apache_logs(remote_host, remote_logname, remote_user, request_time, request
 ├── spark                      # spark source files
 └── README.md
 ```
+
+<details>
+  <summary>Пример витрины данных</summary>
+
+  ![data_mart](./images/data_mart.png)
+
+</details>

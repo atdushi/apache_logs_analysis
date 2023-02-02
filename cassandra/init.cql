@@ -1,6 +1,6 @@
-bin/cassandra
-bin/nodetool status
-bin/cqlsh
+-- bin/cassandra
+-- bin/nodetool status
+-- bin/cqlsh
 
 SELECT * FROM system.local;
 
