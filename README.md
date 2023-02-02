@@ -82,6 +82,15 @@ CREATE TABLE apache_logs (
     final_status int,
     bytes_sent int,
     user_agent text,
+    device_family text,
+    device_brand text,
+    device_model text,
+    browser_family text,
+    browser_version text,
+    is_mobile boolean,
+    is_tablet boolean,
+    is_pc boolean,
+    is_bot boolean,
     PRIMARY KEY (remote_host, request_time)
 );
 ```
@@ -89,7 +98,7 @@ CREATE TABLE apache_logs (
 Загрузка CSV в случае инициализирующей загрузки:
 
 ```sql
-COPY apache_logs(remote_host, remote_logname, remote_user, request_time, request_line, final_status, bytes_sent, user_agent) FROM 'apache logs .csv' WITH DELIMITER=',' AND HEADER=TRUE;
+COPY apache_logs(remote_host, remote_logname, remote_user, request_time, request_line, final_status, bytes_sent, user_agent, device_family, device_brand, device_model, browser_family, browser_version, is_mobile, is_tablet, is_pc, is_bot) FROM 'apache logs path' WITH DELIMITER=',' AND HEADER=TRUE;
 ```
 
 ## Результаты разработки
