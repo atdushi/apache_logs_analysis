@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Apakari](images/logo.png)
+![Logo](images/logo.png)
 
 </div>
 
