@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Logo](images/logo_g.png)
+![Logo](images/logo.png)
 
 </div>
 
@@ -61,6 +61,8 @@ https://disk.yandex.ru/d/BsdiH3DMTHpPrw
 
 ### Настройка и запуск
 
+#### Cassandra
+
 Полезные ссылки:
 - https://cassandra.apache.org/doc/latest/cassandra/getting_started/installing.html
 - https://docs.datastax.com/en/developer/python-driver/3.25/getting_started/
@@ -107,6 +109,54 @@ CREATE TABLE apache_logs (
 ```sql
 COPY apache_logs(remote_host, remote_logname, remote_user, request_time, request_line, final_status, bytes_sent, user_agent, device_family, device_brand, device_model, browser_family, browser_version, is_mobile, is_tablet, is_pc, is_bot) FROM 'apache logs path' WITH DELIMITER=',' AND HEADER=TRUE;
 ```
+
+#### Kubernetes
+
+minikube version: v1.28.0
+
+<details>
+  <summary>Пример</summary>
+
+```bash
+minikube start --driver=docker --mount --mount-string "/dir/to/share:/tmp/apache_logs_analysis"
+
+# Билдим образ:
+docker build -f ./docker/Dockerfile -t izair/apache_logs_analysis:1.0.4 .
+docker push izair/apache_logs_analysis:1.0.4
+
+# Заранее пулим:
+minikube ssh docker pull izair/apache_logs_analysis:1.0.4
+
+# Потом смонтированную папку смонтируем на POD:
+export VOLUME_TYPE=hostPath
+export VOLUME_NAME=demo-host-mount
+export MOUNT_PATH=/tmp/apache_logs_analysis
+
+# Открываем порт 8001:
+kubectl proxy
+
+spark-submit \
+  --master=k8s://http://127.0.0.1:8001 \
+  --deploy-mode cluster \
+  --name apache_logs_analysis \
+  --class org.example.App \
+  --conf "spark.kubernetes.container.image=izair/apache_logs_analysis:1.0.4" \
+  --conf spark.kubernetes.driver.volumes.$VOLUME_TYPE.$VOLUME_NAME.mount.path=$MOUNT_PATH \
+  --conf spark.kubernetes.driver.volumes.$VOLUME_TYPE.$VOLUME_NAME.options.path=$MOUNT_PATH \
+  --conf spark.kubernetes.executor.volumes.$VOLUME_TYPE.$VOLUME_NAME.mount.path=$MOUNT_PATH \
+  --conf spark.kubernetes.executor.volumes.$VOLUME_TYPE.$VOLUME_NAME.options.path=$MOUNT_PATH \
+  --conf spark.executor.instances=1 \
+  --conf spark.driver.memory=512m \
+  --conf spark.executor.memory=512m \
+  --conf spark.driver.cores=1 \
+  --conf spark.executor.cores=1 \
+  --conf spark.kubernetes.namespace=default \
+  local:///opt/apache_logs_analysis-1.0-jar-with-dependencies.jar
+
+# Смотрим логи:
+minikube dashboard
+```
+</details>
 
 ## Результаты разработки
 В результате был создан проект со следующей структурой:

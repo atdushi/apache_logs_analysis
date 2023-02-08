@@ -1,5 +1,6 @@
 package org.example
 
+import com.datastax.spark.connector.CassandraSparkExtensions
 import org.apache.spark.sql.cassandra.DataFrameReaderWrapper
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
@@ -33,15 +34,16 @@ object App {
 
     df.show(truncate = false)
 
-    df.write.option("header", true).mode(SaveMode.Overwrite).csv("./result")
+    df.write.option("header", true).mode(SaveMode.Overwrite).csv("/tmp/apache_logs_analysis/result")
   }
 
   private def init(): SparkSession = {
     val spark = SparkSession.builder()
       .master("local[1]")
       .appName("Task3")
-      //      .withExtensions(new CassandraSparkExtensions)
-      //      .config("spark.sql.extensions", "com.datastax.spark.connector.CassandraSparkExtensions")
+      .withExtensions(new CassandraSparkExtensions)
+      .config("spark.sql.extensions", "com.datastax.spark.connector.CassandraSparkExtensions")
+      .config("spark.cassandra.connection.host", "host.docker.internal") // for "minikube start --driver=docker"
       //      .config("spark.cassandra.connection.host", "localhost")
       //      .config("spark.cassandra.connection.port", 9042)
       .getOrCreate()
