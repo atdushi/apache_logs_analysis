@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Logo](images/logo.png)
+![Logo](images/logo2.png)
 
 </div>
 
@@ -43,7 +43,7 @@ https://disk.yandex.ru/d/BsdiH3DMTHpPrw
 
 ### Схема
 
-![Diagram1](./images/diagram.drawio.png)
+![Diagram1](./images/diagram.drawio2.png)
 
 Программа может работать в двух режимах
 
