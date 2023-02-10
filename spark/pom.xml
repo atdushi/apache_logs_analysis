@@ -103,7 +103,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.mrpowers</groupId>
-            <artifactId>spark-fast-tests_2.12</artifactId>
+            <artifactId>spark-fast-tests_${scala.major.version}</artifactId>
             <version>0.21.3</version>
             <scope>test</scope>
         </dependency>
