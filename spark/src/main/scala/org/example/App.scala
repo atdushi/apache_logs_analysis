@@ -65,7 +65,7 @@ object App {
     df
   }
 
-  private def cleansing(df: DataFrame): DataFrame = {
+  def cleansing(df: DataFrame): DataFrame = {
     if (!count_bots)
       df.filter(col("is_bot") === false)
     else
@@ -75,7 +75,7 @@ object App {
   /*
     Assumption: user == remote_host
    */
-  private def enrich(in: DataFrame): DataFrame = {
+  def enrich(in: DataFrame): DataFrame = {
     var df = in.withColumn("total_distinct_hosts", size(collect_set("remote_host").over()))
     df = df.withColumn("distinct_hosts_by_device", size(collect_set("remote_host").over(Window.partitionBy("device_model"))))
     df = df.withColumn("total_request_count", size(collect_set("request_line").over()))
@@ -86,7 +86,7 @@ object App {
     df
   }
 
-  private def load(in: DataFrame): DataFrame = {
+  def load(in: DataFrame): DataFrame = {
     val df = in.groupBy(col("device_model"))
       .agg(
         count(lit("*")).as("device count"),
