@@ -35,7 +35,7 @@ https://disk.yandex.ru/d/BsdiH3DMTHpPrw
 ## План реализации
 
 ### Используемые технологии
-Технологический стек – Apache Spark, Cassandra, Python.
+Технологический стек – Apache Spark 3.3.1, Cassandra 4.0.7, Python 3.10, Minikube v1.28.0.
 
 В качестве файловой системы используется обычная файловая система хостовой машины.
 

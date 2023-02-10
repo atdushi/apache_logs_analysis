@@ -33,7 +33,7 @@ https://disk.yandex.ru/d/BsdiH3DMTHpPrw
 ## Implementation plan
 
 ### Technologies used
-Technology stack - Apache Spark, Cassandra, Python.
+Technology stack - Apache Spark 3.3.1, Cassandra 4.0.7, Python 3.10, Minikube v1.28.0.
 
 The file system used is the regular file system of the host machine.
 
