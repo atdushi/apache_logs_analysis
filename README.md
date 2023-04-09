@@ -31,8 +31,6 @@ https://disk.yandex.ru/d/BsdiH3DMTHpPrw
 
 </details>
 
----
-
 ## План реализации
 
 ### Используемые технологии
