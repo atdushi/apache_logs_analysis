@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Logo](images/logo2.png)
+![Logo](./images/logo2.png)
 
 </div>
 
